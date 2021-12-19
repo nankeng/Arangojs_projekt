@@ -1,7 +1,7 @@
 // Express setup
 const express = require('express')
 const app = express()
-const port = 3000
+const port = 10800
 
 // ArangoJS setup
 const { Database, aql } = require('arangojs')
@@ -17,7 +17,6 @@ app.get('/', (req, res) => {
   main().then((sales) => {
     res.send(sales.map(sale => sale.Country).join())
   })
-  
 })
 
 app.listen(port, () => {
