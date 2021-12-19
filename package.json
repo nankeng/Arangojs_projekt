@@ -11,5 +11,8 @@
     "url": "https://git.fslab.de/jkoll2s/arangodb-arangojs.git"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "arangojs": "^7.6.1"
+  }
 }
