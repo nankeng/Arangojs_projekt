@@ -1,9 +1,11 @@
-//Queries
-
 // Express setup
 const express = require('express')
 const app = express()
 const port = 10800
+// Start server
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`)
+})
 
 // ArangoJS setup
 const { Database, aql } = require('arangojs')
@@ -14,33 +16,71 @@ const db = new Database({
   auth: { username: 'root', password: 'c017-team8' },
 })
 
-// Routes
+
+
+// Collections
+const countriesColl = db.collection('Countries')
+const ordersColl = db.collection('Orders')
+const transportsColl = db.collection('Transports')
+
+// Utils
+const keysToLowerCase = require('./utils/json-lower.js')
+
+//===========================================================================
+
+// Query Imports
+const getItems = require('./queries/get-items.js')
+const getSupplier = require('./queries/get-supplier.js')
+const getCountries = require('./queries/get-countries.js')
+const getItemTypes = require('./queries/get-item-types.js')
+const getOrders = require('./queries/get-orders.js')
+
 app.get('/', (req, res) => {
   main().then((transports) => {
     res.send(transports)
   })
 })
-
-// Collections
-const Orders = db.collection('Orders')
-const Transports = db.collection('Transports')
-const Countries = db.collection('Countries')
-
-// Imports
-const analysisTransports = require('./queries/analysis-transport.js')
-
-
 async function main() {
   try {
-    const cursor = await db.query(analysisTransports(Transports, Countries, Orders, {}))
+    const cursor = await db.query(
+      analysisTransports(transportsColl, countriesColl, ordersColl, {})
+    )
+    //todo: hier muss noch die schleife gemachjt wertden
     const result = await cursor.next()
-    console.log("Query transports complete!")
+    console.log('Query transports complete!')
     return result
   } catch (err) {
     console.error(err.message)
   }
 }
 
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`)
+
+
+// GET
+
+// Items
+
+app.get('/items', async (req, res) => {
+  const filters = keysToLowerCase(req.queryParams)
+  const cursor = await db.query(getItems(ordersColl, filters))
+  const result = []
+  for await (const value of cursor) {
+    // Process each value asynchronously
+    await result.push(value);
+  }
+  res.send(result)
+  return result
+})
+
+// Orders
+app.get('/orders', async (req, res) => {
+  const filters = keysToLowerCase(req.queryParams)
+  const cursor = await db.query(getOrders(ordersColl, transportsColl, countriesColl, filters))
+  const result = []
+  for await (const value of cursor) {
+    // Process each value asynchronously
+    await result.push(value);
+  }
+  res.send(result)
+  return result
 })
