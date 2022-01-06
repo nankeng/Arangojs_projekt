@@ -26,47 +26,13 @@ const Orders = db.collection('Orders')
 const Transports = db.collection('Transports')
 const Countries = db.collection('Countries')
 
+// Imports
+const analysisTransports = require('./queries/analysis-transport.js')
+
+
 async function main() {
   try {
-    const cursor = await db.query(aql`
-    FOR transport in ${Transports}
-    FILTER transport.Supplier == "Beauty-DE"
-    LET transportData = (
-    LET fromCountry = (
-        FOR c IN ${Countries}
-            FILTER c._id == transport._from
-            LIMIT 1
-            RETURN {
-                "Country": c._key,
-                "Region": c.Region
-            }
-    )
-    LET toCountry = (
-        FOR c IN ${Countries}
-            FILTER c._id == transport._to
-            LIMIT 1
-            RETURN {
-                "Country": c._key,
-                "Region": c.Region
-            }
-    )
-    RETURN {
-        "fromCountry": fromCountry[0], 
-        "toCountry": toCountry[0], 
-        "Supplier": transport.Supplier,
-        "Ship Date": transport.\`Ship Date\`
-    }
-)
-LET orderData = (
-    FOR o IN ${Orders}
-        FILTER o._key == transport._key
-        RETURN o
-)
-
-RETURN {
-    transport, transportData, orderData
-}
-     `)
+    const cursor = await db.query(analysisTransports(Transports, Countries, Orders, {}))
     const result = await cursor.next()
     console.log("Query transports complete!")
     return result
