@@ -68,7 +68,7 @@ RETURN {
 }
      `)
     const result = await cursor.next()
-    console.log("Query transports complete.")
+    console.log("Query transports complete!")
     return result
   } catch (err) {
     console.error(err.message)
