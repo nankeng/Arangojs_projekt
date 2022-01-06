@@ -61,11 +61,10 @@ async function main() {
 // Items
 
 app.get('/items', async (req, res) => {
-  const filters = keysToLowerCase(req.queryParams)
+  const filters = keysToLowerCase(req.query)
   const cursor = await db.query(getItems(ordersColl, filters))
   const result = []
   for await (const value of cursor) {
-    // Process each value asynchronously
     await result.push(value);
   }
   res.send(result)
@@ -74,11 +73,10 @@ app.get('/items', async (req, res) => {
 
 // Orders
 app.get('/orders', async (req, res) => {
-  const filters = keysToLowerCase(req.queryParams)
+  const filters = keysToLowerCase(req.query)
   const cursor = await db.query(getOrders(ordersColl, transportsColl, countriesColl, filters))
   const result = []
   for await (const value of cursor) {
-    // Process each value asynchronously
     await result.push(value);
   }
   res.send(result)
