@@ -24,6 +24,7 @@ app.get('/', (req, res) => {
 // Collections 
 const Orders = db.collection("Orders");
 const Transports = db.collection("Transports");
+const Countries = db.collection("Countries");
 
 async function main() {
   let result = []
@@ -54,7 +55,7 @@ async function main() {
         "fromCountry": fromCountry[0], 
         "toCountry": toCountry[0], 
         "Supplier": transport.Supplier,
-        "Ship Date": transport.'Ship Date'
+        "Ship Date": transport.\`Ship Date\`
     }
 )
 LET orderData = (
