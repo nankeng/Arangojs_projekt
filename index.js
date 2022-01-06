@@ -21,15 +21,14 @@ app.get('/', (req, res) => {
   })
 })
 
-// Collections 
-const Orders = db.collection("Orders");
-const Transports = db.collection("Transports");
-const Countries = db.collection("Countries");
+// Collections
+const Orders = db.collection('Orders')
+const Transports = db.collection('Transports')
+const Countries = db.collection('Countries')
 
 async function main() {
-  let result = []
   try {
-    const transports = await db.query(aql`
+    const cursor = await db.query(aql`
     FOR transport in ${Transports}
     FILTER transport.Supplier == "Beauty-DE"
     LET transportData = (
@@ -67,26 +66,15 @@ LET orderData = (
 RETURN {
     transport, transportData, orderData
 }
-     `);
-    console.log("Übersichts-Liste von allen Items (Sortiment):");
-
-    for await (const transport of transports) {
-      //console.log(order);
-      result.push(transport)
-
-    }
-  }
-
-  catch (err) {
+     `)
+    const result = await cursor.next()
+    console.log("Query transports complete.")
+    return result
+  } catch (err) {
     console.error(err.message)
   }
-
-
-  }
+}
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`)
 })
-
-
-
