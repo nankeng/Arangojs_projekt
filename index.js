@@ -16,8 +16,6 @@ const db = new Database({
   auth: { username: 'root', password: 'c017-team8' },
 })
 
-
-
 // Collections
 const countriesColl = db.collection('Countries')
 const ordersColl = db.collection('Orders')
@@ -35,49 +33,76 @@ const getCountries = require('./queries/get-countries.js')
 const getItemTypes = require('./queries/get-item-types.js')
 const getOrders = require('./queries/get-orders.js')
 
-app.get('/', (req, res) => {
-  main().then((transports) => {
-    res.send(transports)
-  })
-})
-async function main() {
-  try {
-    const cursor = await db.query(
-      analysisTransports(transportsColl, countriesColl, ordersColl, {})
-    )
-    //todo: hier muss noch die schleife gemachjt wertden
-    const result = await cursor.next()
-    console.log('Query transports complete!')
-    return result
-  } catch (err) {
-    console.error(err.message)
-  }
-}
-
-
-
 // GET
-
 // Items
-
-app.get('/items', async (req, res) => {
+app.get('/items/:id?', async (req, res) => {
   const filters = keysToLowerCase(req.query)
+  if ((typeof req.params.id != 'undefined') & (req.params.id != ''))
+    filters.id = req.params.id
   const cursor = await db.query(getItems(ordersColl, filters))
   const result = []
   for await (const value of cursor) {
-    await result.push(value);
+    await result.push(value)
   }
   res.send(result)
   return result
 })
 
 // Orders
-app.get('/orders', async (req, res) => {
+app.get('/orders/:id?', async (req, res) => {
   const filters = keysToLowerCase(req.query)
-  const cursor = await db.query(getOrders(ordersColl, transportsColl, countriesColl, filters))
+  if ((typeof req.params.id != 'undefined') & (req.params.id != ''))
+    filters.id = req.params.id
+  const cursor = await db.query(
+    getOrders(ordersColl, transportsColl, countriesColl, filters)
+  )
   const result = []
   for await (const value of cursor) {
-    await result.push(value);
+    await result.push(value)
+  }
+  res.send(result)
+  return result
+})
+
+// Supplier
+app.get('/supplier/:name?', async (req, res) => {
+  const filters = keysToLowerCase(req.query)
+  if ((typeof req.params.name != 'undefined') & (req.params.name != ''))
+    filters.name = req.params.name
+  const cursor = await db.query(
+    getSupplier(transportsColl, countriesColl, filters)
+  )
+  const result = []
+  for await (const value of cursor) {
+    await result.push(value)
+  }
+  res.send(result)
+  return result
+})
+
+// Countries
+app.get('/countries', async (req, res) => {
+  const filters = keysToLowerCase(req.query)
+  const cursor = await db.query(
+    getCountries(transportsColl, countriesColl, filters)
+  )
+  const result = []
+  for await (const value of cursor) {
+    await result.push(value)
+  }
+  res.send(result)
+  return result
+})
+
+// Item-Types
+app.get('/item-types/:type?', async (req, res) => {
+  const filters = keysToLowerCase(req.query)
+  if ((typeof req.params.type != 'undefined') & (req.params.type != ''))
+    filters.type = req.params.type
+  const cursor = await db.query(getItemTypes(ordersColl, filters))
+  const result = []
+  for await (const value of cursor) {
+    await result.push(value)
   }
   res.send(result)
   return result
